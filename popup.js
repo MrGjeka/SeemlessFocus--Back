@@ -67,12 +67,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 option.textContent = playlist.name;
                 playlistSelector.appendChild(option);
             });
+
+            // Retrieve and set the stored playlist ID
+            chrome.storage.local.get(['selectedPlaylistId'], (result) => {
+                if (result.selectedPlaylistId) {
+                    playlistSelector.value = result.selectedPlaylistId;
+                    console.log('Restored selected playlist ID:', result.selectedPlaylistId);
+                } else {
+                    console.log('No stored playlist ID found');
+                }
+            });
         })
         .catch(error => {
             console.error('Error fetching playlists:', error);
             playlistSelector.innerHTML = `<option>Error fetching playlists: ${error.message}</option>`;
         });
     }
+
+    // Add event listener to save selected playlist ID when it changes
+    playlistSelector.addEventListener('change', () => {
+        const selectedPlaylistId = playlistSelector.value;
+        chrome.storage.local.set({ 'selectedPlaylistId': selectedPlaylistId }, () => {
+            console.log('Selected playlist ID saved:', selectedPlaylistId);
+        });
+    });
 
     async function getActiveDevice() {
         try {
